@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Police Watch</string>
+    <string name="plane_image">Plane Image</string>
+    <string name="phone_verification">Phone Verification</string>
+    <string name="verification_description_text">We will send you an One Time Password on this number for verification</string>
+    <string name="enter_mobile_number">Enter Your Mobile Number</string>
+    <string name="_91">+91-</string>
+    <string name="_1234567890">1234567890</string>
+    <string name="next">Next</string>
+    <string name="otp_verification">OTP Verification</string>
+    <string name="dummy_string">Please enter the OTP sent to +91 1234567890</string>
+    <string name="verify">Verify</string>
+    <string name="back_button">Back Button</string>
+</resources>
