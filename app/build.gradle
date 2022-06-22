@@ -56,6 +56,7 @@ dependencies {
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:30.1.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth-ktx'
 
     // OTP field
     implementation 'com.github.aabhasr1:OtpView:v1.1.2-ktx'

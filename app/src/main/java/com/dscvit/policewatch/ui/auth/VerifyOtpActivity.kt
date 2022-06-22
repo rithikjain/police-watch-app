@@ -2,7 +2,6 @@ package com.dscvit.policewatch.ui.auth
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivityVerifyOtpBinding
 
 class VerifyOtpActivity : AppCompatActivity() {
@@ -15,6 +14,10 @@ class VerifyOtpActivity : AppCompatActivity() {
         binding = ActivityVerifyOtpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupListeners()
+    }
+
+    private fun setupListeners() {
         binding.backButton.setOnClickListener {
             finish()
         }

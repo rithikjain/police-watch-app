@@ -1,9 +1,8 @@
 package com.dscvit.policewatch.ui.auth
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.dscvit.policewatch.R
+import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.databinding.ActivityPhoneNumberBinding
 
 class PhoneNumberActivity : AppCompatActivity() {
@@ -16,6 +15,10 @@ class PhoneNumberActivity : AppCompatActivity() {
         binding = ActivityPhoneNumberBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupListeners()
+    }
+
+    private fun setupListeners() {
         binding.nextButton.setOnClickListener {
             val intent = Intent(this, VerifyOtpActivity::class.java)
             startActivity(intent)

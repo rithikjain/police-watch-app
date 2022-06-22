@@ -11,4 +11,5 @@
     <string name="dummy_string">Please enter the OTP sent to +91 1234567890</string>
     <string name="verify">Verify</string>
     <string name="back_button">Back Button</string>
+    <string name="loading">Loading...</string>
 </resources>
