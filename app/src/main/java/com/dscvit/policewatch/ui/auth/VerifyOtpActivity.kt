@@ -3,13 +3,14 @@ package com.dscvit.policewatch.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.databinding.ActivityVerifyOtpBinding
 import com.dscvit.policewatch.repository.UserRepository
 import com.dscvit.policewatch.ui.home.HomeActivity
 import com.dscvit.policewatch.ui.utils.LoadingDialog
 import com.dscvit.policewatch.ui.utils.showErrorSnackBar
-import com.dscvit.policewatch.ui.utils.showSuccessSnackBar
+import com.dscvit.policewatch.utils.Resource
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
@@ -27,6 +28,7 @@ class VerifyOtpActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityVerifyOtpBinding
     private val loadingDialog by lazy { LoadingDialog(this) }
+    private val viewModel: AuthViewModel by viewModels()
 
     @Inject
     lateinit var userRepository: UserRepository
@@ -38,6 +40,7 @@ class VerifyOtpActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupListeners()
+        setupObservers()
     }
 
     private fun setupListeners() {
@@ -51,6 +54,27 @@ class VerifyOtpActivity : AppCompatActivity() {
             } else {
                 loadingDialog.start("Verifying OTP...")
                 verifyOTP(binding.otpTextField.otp ?: "")
+            }
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.getUserLiveData.observe(this) {
+            loadingDialog.stop()
+            when (it) {
+                is Resource.Success -> {
+                    Log.d(TAG, "Status Code: ${it.statusCode.toString()}")
+                    viewModel.setUserSignedIn()
+                    navigateToHomeActivity()
+                }
+                is Resource.Error -> {
+                    if (it.statusCode == 401) {
+                        binding.root.showErrorSnackBar("Phone number does not exist in database!")
+                    } else {
+                        binding.root.showErrorSnackBar("Network Error")
+                    }
+                    Log.d(TAG, "Status Code: ${it.statusCode.toString()}, Message: ${it.message}")
+                }
             }
         }
     }
@@ -73,17 +97,16 @@ class VerifyOtpActivity : AppCompatActivity() {
                 loadingDialog.stop()
 
                 if (task.isSuccessful) {
-                    binding.root.showSuccessSnackBar("Signed In!")
                     Log.d(TAG, "signInWithCredential:success")
                     val user = task.result?.user
 
                     user?.getIdToken(false)?.addOnCompleteListener {
                         if (it.isSuccessful) {
                             userRepository.saveUserToken(it.result.token ?: "")
+                            loadingDialog.start("Checking if phone number exists in database...")
+                            viewModel.getUser(it.result.token ?: "")
                         }
                     }
-
-                    navigateToHomeActivity()
                 } else {
                     if (task.exception is FirebaseAuthInvalidCredentialsException) {
                         binding.root.showErrorSnackBar("Wrong OTP")

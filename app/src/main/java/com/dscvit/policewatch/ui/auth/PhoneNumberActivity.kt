@@ -11,6 +11,7 @@ import com.dscvit.policewatch.ui.home.HomeActivity
 import com.dscvit.policewatch.ui.utils.LoadingDialog
 import com.dscvit.policewatch.ui.utils.showErrorSnackBar
 import com.dscvit.policewatch.ui.utils.showSuccessSnackBar
+import com.dscvit.policewatch.utils.Resource
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
@@ -30,6 +31,7 @@ class PhoneNumberActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPhoneNumberBinding
     private val loadingDialog by lazy { LoadingDialog(this) }
+    private val viewModel: AuthViewModel by viewModels()
 
     @Inject
     lateinit var userRepository: UserRepository
@@ -42,6 +44,7 @@ class PhoneNumberActivity : AppCompatActivity() {
 
         navigateToHomeIfUserSignedIn()
         setupListeners()
+        setupObservers()
     }
 
     private fun setupListeners() {
@@ -55,8 +58,29 @@ class PhoneNumberActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupObservers() {
+        viewModel.getUserLiveData.observe(this) {
+            loadingDialog.stop()
+            when (it) {
+                is Resource.Success -> {
+                    Log.d(TAG, "Status Code: ${it.statusCode.toString()}")
+                    viewModel.setUserSignedIn()
+                    navigateToHomeActivity()
+                }
+                is Resource.Error -> {
+                    if (it.statusCode == 401) {
+                        binding.root.showErrorSnackBar("Phone number does not exist in database!")
+                    } else {
+                        binding.root.showErrorSnackBar("Network Error")
+                    }
+                    Log.d(TAG, "Status Code: ${it.statusCode.toString()}, Message: ${it.message}")
+                }
+            }
+        }
+    }
+
     private fun navigateToHomeIfUserSignedIn() {
-        if (Firebase.auth.currentUser != null) {
+        if (viewModel.isUserSignedIn()) {
             navigateToHomeActivity()
         }
     }
@@ -117,10 +141,10 @@ class PhoneNumberActivity : AppCompatActivity() {
                     user?.getIdToken(false)?.addOnCompleteListener {
                         if (it.isSuccessful) {
                             userRepository.saveUserToken(it.result.token ?: "")
+                            loadingDialog.start("Checking if phone number exists in database...")
+                            viewModel.getUser(it.result.token ?: "")
                         }
                     }
-
-                    navigateToHomeActivity()
                 } else {
                     binding.root.showErrorSnackBar("signInWithCredential:failure - ${task.exception}")
                     Log.w(TAG, "signInWithCredential:failure", task.exception)

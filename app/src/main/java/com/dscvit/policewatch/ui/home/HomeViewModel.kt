@@ -27,6 +27,10 @@ class HomeViewModel @Inject constructor(private val userRepository: UserReposito
         userRepository.resetSavedUserToken()
     }
 
+    fun setUserSignedOut() {
+        userRepository.setUserSignedIn(false)
+    }
+
     private fun updateUserToken() {
         Firebase.auth.currentUser?.getIdToken(true)?.addOnCompleteListener {
             if (it.isSuccessful) {

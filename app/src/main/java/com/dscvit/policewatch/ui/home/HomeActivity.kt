@@ -33,9 +33,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.signOutButton.setOnClickListener {
-            Firebase.auth.signOut()
-            viewModel.resetSavedUserToken()
-            navigateToPhoneNumberActivity()
+            signOut()
         }
     }
 
@@ -44,6 +42,13 @@ class HomeActivity : AppCompatActivity() {
             // DO something with the ID Token here
             Log.d(TAG, it ?: "")
         }
+    }
+
+    private fun signOut() {
+        Firebase.auth.signOut()
+        viewModel.resetSavedUserToken()
+        viewModel.setUserSignedOut()
+        navigateToPhoneNumberActivity()
     }
 
     private fun navigateToPhoneNumberActivity() {

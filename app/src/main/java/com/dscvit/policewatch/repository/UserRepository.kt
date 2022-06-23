@@ -21,4 +21,12 @@ class UserRepository(private val sharedPref: SharedPreferences, private val apiC
     fun resetSavedUserToken() {
         sharedPref[Constants.SHARED_PREF_USER_TOKEN] = ""
     }
+
+    fun setUserSignedIn(isSignedIn: Boolean) {
+        sharedPref[Constants.SHARED_PREF_IS_USER_SIGNED_IN] = isSignedIn
+    }
+
+    fun isUserSignedIn(): Boolean {
+        return sharedPref[Constants.SHARED_PREF_IS_USER_SIGNED_IN] ?: false
+    }
 }
