@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.databinding.ActivityPhoneNumberBinding
+import com.dscvit.policewatch.ui.home.HomeActivity
 import com.dscvit.policewatch.ui.utils.LoadingDialog
 import com.dscvit.policewatch.ui.utils.showErrorSnackBar
 import com.dscvit.policewatch.ui.utils.showSuccessSnackBar
@@ -32,6 +33,7 @@ class PhoneNumberActivity : AppCompatActivity() {
         binding = ActivityPhoneNumberBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        navigateToHomeIfUserSignedIn()
         setupListeners()
     }
 
@@ -46,10 +48,22 @@ class PhoneNumberActivity : AppCompatActivity() {
         }
     }
 
+    private fun navigateToHomeIfUserSignedIn() {
+        if (Firebase.auth.currentUser != null) {
+            navigateToHomeActivity()
+        }
+    }
+
     private fun navigateToVerifyOtpActivity(verificationID: String) {
         val intent = Intent(this, VerifyOtpActivity::class.java)
         intent.putExtra("verificationID", verificationID)
         startActivity(intent)
+    }
+
+    private fun navigateToHomeActivity() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private val phoneAuthCallbacks =
@@ -92,6 +106,8 @@ class PhoneNumberActivity : AppCompatActivity() {
                     binding.root.showSuccessSnackBar("Signed In!")
                     Log.d(TAG, "signInWithCredential:success")
                     val user = task.result?.user
+
+                    navigateToHomeActivity()
                 } else {
                     binding.root.showErrorSnackBar("signInWithCredential:failure - ${task.exception}")
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
