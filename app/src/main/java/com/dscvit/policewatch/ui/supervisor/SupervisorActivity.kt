@@ -1,6 +1,7 @@
 package com.dscvit.policewatch.ui.supervisor
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.PopupMenu
@@ -13,12 +14,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.maps.android.ui.IconGenerator
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -87,14 +88,38 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
+        try {
+            val success =
+                map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style))
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Can't find style. Error: ", e)
+        }
+
         map.setMinZoomPreference(10f)
 
         val home = LatLng(12.888593, 77.545432)
+
+        val iconGenerator = IconGenerator(this)
+        iconGenerator.setStyle(IconGenerator.STYLE_BLUE)
+
         map.addMarker(
             MarkerOptions()
                 .position(home)
-                .title("Marker at Home")
+                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("Home")))
+                .anchor(iconGenerator.anchorU, iconGenerator.anchorV)
         )
+
+        map.addCircle(
+            CircleOptions()
+                .center(home)
+                .radius(100.0)
+                .strokeColor(Color.parseColor("#7087CEEB"))
+                .fillColor(Color.parseColor("#6087CEEB"))
+        )
+
         val cameraPosition = CameraPosition.Builder()
             .target(home)
             .zoom(13f)
