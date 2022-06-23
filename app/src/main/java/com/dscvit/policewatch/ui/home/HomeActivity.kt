@@ -42,6 +42,7 @@ class HomeActivity : AppCompatActivity() {
     private fun setupObservers() {
         viewModel.idToken.observe(this) {
             // DO something with the ID Token here
+            Log.d(TAG, it ?: "")
         }
     }
 
