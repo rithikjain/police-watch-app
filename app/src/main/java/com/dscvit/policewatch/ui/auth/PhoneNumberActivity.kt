@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.databinding.ActivityPhoneNumberBinding
+import com.dscvit.policewatch.repository.UserRepository
 import com.dscvit.policewatch.ui.home.HomeActivity
 import com.dscvit.policewatch.ui.utils.LoadingDialog
 import com.dscvit.policewatch.ui.utils.showErrorSnackBar
@@ -16,8 +17,11 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class PhoneNumberActivity : AppCompatActivity() {
 
     companion object {
@@ -26,6 +30,9 @@ class PhoneNumberActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPhoneNumberBinding
     private val loadingDialog by lazy { LoadingDialog(this) }
+
+    @Inject
+    lateinit var userRepository: UserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +113,12 @@ class PhoneNumberActivity : AppCompatActivity() {
                     binding.root.showSuccessSnackBar("Signed In!")
                     Log.d(TAG, "signInWithCredential:success")
                     val user = task.result?.user
+
+                    user?.getIdToken(false)?.addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            userRepository.saveUserToken(it.result.token ?: "")
+                        }
+                    }
 
                     navigateToHomeActivity()
                 } else {
