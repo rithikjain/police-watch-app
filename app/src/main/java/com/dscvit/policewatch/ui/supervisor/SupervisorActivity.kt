@@ -3,8 +3,10 @@ package com.dscvit.policewatch.ui.supervisor
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivitySupervisorBinding
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
 import com.google.firebase.auth.ktx.auth
@@ -32,8 +34,18 @@ class SupervisorActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.signOutButton.setOnClickListener {
-            signOut()
+        binding.moreOptionsImageView.setOnClickListener {
+            val popUpMenu = PopupMenu(this, binding.moreOptionsImageView)
+            popUpMenu.menuInflater.inflate(R.menu.pop_up_menu, popUpMenu.menu)
+
+            popUpMenu.setOnMenuItemClickListener {
+                if (it.itemId == R.id.sign_out) {
+                    signOut()
+                }
+                return@setOnMenuItemClickListener true
+            }
+
+            popUpMenu.show()
         }
     }
 
