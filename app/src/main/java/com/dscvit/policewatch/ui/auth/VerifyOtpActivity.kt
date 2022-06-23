@@ -40,8 +40,15 @@ class VerifyOtpActivity : AppCompatActivity() {
         binding = ActivityVerifyOtpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupViews()
         setupListeners()
         setupObservers()
+    }
+
+    private fun setupViews() {
+        val phoneNumber = intent.getStringExtra("phoneNumber")
+        val text = "Please enter the OTP sent to +91 $phoneNumber"
+        binding.descriptionTextView.text = text
     }
 
     private fun setupListeners() {

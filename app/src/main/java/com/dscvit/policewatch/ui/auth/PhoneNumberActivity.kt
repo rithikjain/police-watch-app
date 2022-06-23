@@ -34,6 +34,8 @@ class PhoneNumberActivity : AppCompatActivity() {
     private val loadingDialog by lazy { LoadingDialog(this) }
     private val viewModel: AuthViewModel by viewModels()
 
+    private var phoneNumber = ""
+
     @Inject
     lateinit var userRepository: UserRepository
 
@@ -53,6 +55,7 @@ class PhoneNumberActivity : AppCompatActivity() {
             if (binding.mobileNumberEditText.text.length != 10) {
                 binding.root.showErrorSnackBar("Please enter a valid phone number")
             } else {
+                phoneNumber = binding.mobileNumberEditText.text.toString()
                 verifyPhone("+91${binding.mobileNumberEditText.text}")
                 loadingDialog.start("Sending an OTP...")
             }
@@ -86,9 +89,10 @@ class PhoneNumberActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToVerifyOtpActivity(verificationID: String) {
+    private fun navigateToVerifyOtpActivity(verificationID: String, phoneNumber: String) {
         val intent = Intent(this, VerifyOtpActivity::class.java)
         intent.putExtra("verificationID", verificationID)
+        intent.putExtra("phoneNumber", phoneNumber)
         startActivity(intent)
     }
 
@@ -117,7 +121,7 @@ class PhoneNumberActivity : AppCompatActivity() {
             ) {
                 loadingDialog.stop()
                 Log.d(TAG, "onCodeSent:$verificationId")
-                navigateToVerifyOtpActivity(verificationId)
+                navigateToVerifyOtpActivity(verificationId, phoneNumber)
             }
         }
 
