@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PoliceWatch">
         <activity
-            android:name=".ui.home.HomeActivity"
+            android:name=".ui.supervisor.SupervisorActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />

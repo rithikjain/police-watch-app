@@ -6,8 +6,9 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.databinding.ActivityVerifyOtpBinding
+import com.dscvit.policewatch.models.User
 import com.dscvit.policewatch.repository.UserRepository
-import com.dscvit.policewatch.ui.home.HomeActivity
+import com.dscvit.policewatch.ui.supervisor.SupervisorActivity
 import com.dscvit.policewatch.ui.utils.LoadingDialog
 import com.dscvit.policewatch.ui.utils.showErrorSnackBar
 import com.dscvit.policewatch.utils.Resource
@@ -64,7 +65,7 @@ class VerifyOtpActivity : AppCompatActivity() {
             when (it) {
                 is Resource.Success -> {
                     Log.d(TAG, "Status Code: ${it.statusCode.toString()}")
-                    viewModel.setUserSignedIn()
+                    viewModel.setUserSignedIn(it.data ?: User())
                     navigateToHomeActivity()
                 }
                 is Resource.Error -> {
@@ -80,7 +81,7 @@ class VerifyOtpActivity : AppCompatActivity() {
     }
 
     private fun navigateToHomeActivity() {
-        val intent = Intent(this, HomeActivity::class.java)
+        val intent = Intent(this, SupervisorActivity::class.java)
         startActivity(intent)
         finishAffinity()
     }

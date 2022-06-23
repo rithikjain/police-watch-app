@@ -23,8 +23,9 @@ class AuthViewModel @Inject constructor(private val userRepo: UserRepository) : 
         }
     }
 
-    fun setUserSignedIn() {
+    fun setUserSignedIn(user: User) {
         userRepo.setUserSignedIn(true)
+        userRepo.saveUser(user)
     }
 
     fun isUserSignedIn(): Boolean {

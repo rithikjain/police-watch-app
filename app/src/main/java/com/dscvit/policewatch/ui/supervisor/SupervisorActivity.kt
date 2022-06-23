@@ -1,30 +1,30 @@
-package com.dscvit.policewatch.ui.home
+package com.dscvit.policewatch.ui.supervisor
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.dscvit.policewatch.databinding.ActivityHomeBinding
+import com.dscvit.policewatch.databinding.ActivitySupervisorBinding
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeActivity : AppCompatActivity() {
+class SupervisorActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "HomeActivity"
+        private const val TAG = "SupervisorActivity"
     }
 
-    private lateinit var binding: ActivityHomeBinding
-    private val viewModel: HomeViewModel by viewModels()
+    private lateinit var binding: ActivitySupervisorBinding
+    private val viewModel: SupervisorViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityHomeBinding.inflate(layoutInflater)
+        binding = ActivitySupervisorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupListeners()
