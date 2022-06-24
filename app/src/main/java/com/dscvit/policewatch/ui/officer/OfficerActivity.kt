@@ -2,6 +2,7 @@ package com.dscvit.policewatch.ui.officer
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -9,8 +10,10 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivityOfficerBinding
+import com.dscvit.policewatch.service.LocationService
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
 import com.fondesa.kpermissions.allGranted
 import com.fondesa.kpermissions.extension.liveData
@@ -40,6 +43,13 @@ class OfficerActivity : AppCompatActivity() {
 
     private fun setupViews() {
         binding.nameTextView.text = "Hi, ${viewModel.getSavedUser()?.firstName}"
+        if (LocationService.IS_RUNNING) {
+            binding.toggleLocationButton.text = "Stop Sharing Location"
+            viewModel.isSharingLocation = true
+        } else {
+            binding.toggleLocationButton.text = "Start Sharing Location"
+            viewModel.isSharingLocation = false
+        }
     }
 
     private fun setupListeners() {
@@ -61,13 +71,31 @@ class OfficerActivity : AppCompatActivity() {
             if (viewModel.isSharingLocation) {
                 binding.toggleLocationButton.text = "Start Sharing Location"
                 viewModel.isSharingLocation = false
-                // TODO: Handle stop location sharing
+                // Stop sharing location
+                stopLocationService()
             } else {
-                binding.toggleLocationButton.text = "Stop Sharing Location"
-                viewModel.isSharingLocation = true
-                // TODO: Handle start location sharing
+                // Start sharing location
+                if (checkIfAllPermissionsAreGranted()) {
+                    startLocationService()
+                    binding.toggleLocationButton.text = "Stop Sharing Location"
+                    viewModel.isSharingLocation = true
+                } else {
+                    showPermissionRequestDialog()
+                }
             }
         }
+    }
+
+    private fun startLocationService() {
+        val intent = Intent(this, LocationService::class.java)
+        intent.putExtra(LocationService.SERVICE_ACTION, LocationService.START)
+        startService(intent)
+    }
+
+    private fun stopLocationService() {
+        val intent = Intent(this, LocationService::class.java)
+        intent.putExtra(LocationService.SERVICE_ACTION, LocationService.STOP)
+        stopService(intent)
     }
 
     private fun signOut() {
@@ -83,6 +111,24 @@ class OfficerActivity : AppCompatActivity() {
         finishAffinity()
     }
 
+    private fun checkIfAllPermissionsAreGranted(): Boolean {
+        val permissions = listOf(
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+        }
+        return true
+    }
+
     private fun getLocationPermissions() {
         permissionsBuilder(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -96,8 +142,6 @@ class OfficerActivity : AppCompatActivity() {
                 ).build().send { res ->
                     if (!res.allGranted()) {
                         showPermissionRequestDialog()
-                    } else {
-                        Toast.makeText(this, "Permissions Granted", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
