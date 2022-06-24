@@ -14,4 +14,6 @@
     <string name="loading">Loading…</string>
     <string name="sign_out">Sign Out</string>
     <string name="more_options">More Options</string>
+    <string name="patrolling_points">Patrolling Points</string>
+    <string name="up_arrow">Up Arrow</string>
 </resources>

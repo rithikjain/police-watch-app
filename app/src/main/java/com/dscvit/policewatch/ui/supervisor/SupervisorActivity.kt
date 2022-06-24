@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ui.IconGenerator
@@ -39,9 +41,26 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivitySupervisorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupViews()
         setupListeners()
         setupObservers()
         setupMap()
+    }
+
+    private fun setupViews() {
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    binding.scrollIndicatorImageView.rotation = 180f
+                } else {
+                    binding.scrollIndicatorImageView.rotation = 0f
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
     }
 
     private fun setupListeners() {
@@ -104,7 +123,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         addPatrollingPoints()
 
         val cameraPosition = CameraPosition.Builder()
-            .target(LatLng(24.514771, 93.792946))
+            .target(LatLng(24.534854, 93.756798))
             .zoom(13f)
             .build()
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
