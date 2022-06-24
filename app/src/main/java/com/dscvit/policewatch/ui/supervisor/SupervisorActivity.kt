@@ -1,6 +1,9 @@
 package com.dscvit.policewatch.ui.supervisor
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +11,7 @@ import android.view.View
 import android.widget.PopupMenu
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dscvit.policewatch.R
@@ -140,6 +144,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         map.setMinZoomPreference(10f)
 
         addPatrollingPoints()
+        addPoliceOfficers()
 
         val cameraPosition = CameraPosition.Builder()
             .target(LatLng(24.534854, 93.756798))
@@ -177,6 +182,25 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
                     .strokeColor(Color.parseColor("#7087CEEB"))
                     .fillColor(Color.parseColor("#6087CEEB"))
             )
+        }
+    }
+
+    private fun addPoliceOfficers() {
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(24.539628, 93.755377))
+                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
+                .title("Police Officer")
+        )
+    }
+
+    private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
+        return ContextCompat.getDrawable(context, vectorResId)?.run {
+            setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            val bitmap =
+                Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+            draw(Canvas(bitmap))
+            BitmapDescriptorFactory.fromBitmap(bitmap)
         }
     }
 }
