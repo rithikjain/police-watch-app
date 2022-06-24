@@ -77,4 +77,10 @@ dependencies {
     // Google Maps
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
     implementation 'com.google.maps.android:android-maps-utils:2.3.0'
+
+    // Location
+    implementation "com.google.android.gms:play-services-location:20.0.0"
+
+    // Permissions
+    implementation 'com.github.fondesa:kpermissions:3.3.0'
 }

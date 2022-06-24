@@ -1,13 +1,22 @@
 package com.dscvit.policewatch.ui.officer
 
+import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivityOfficerBinding
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
+import com.fondesa.kpermissions.allGranted
+import com.fondesa.kpermissions.extension.liveData
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.extension.send
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +33,7 @@ class OfficerActivity : AppCompatActivity() {
         binding = ActivityOfficerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        getLocationPermissions()
         setupViews()
         setupListeners()
     }
@@ -71,5 +81,41 @@ class OfficerActivity : AppCompatActivity() {
         val intent = Intent(this, PhoneNumberActivity::class.java)
         startActivity(intent)
         finishAffinity()
+    }
+
+    private fun getLocationPermissions() {
+        permissionsBuilder(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ).build().send { result ->
+            if (!result.allGranted()) {
+                showPermissionRequestDialog()
+            } else {
+                permissionsBuilder(
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ).build().send { res ->
+                    if (!res.allGranted()) {
+                        showPermissionRequestDialog()
+                    } else {
+                        Toast.makeText(this, "Permissions Granted", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showPermissionRequestDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Location Permission Required")
+            .setMessage("Location permission is needed to use this app, kindly select the Allow all time option.")
+            .setCancelable(false)
+            .setPositiveButton("Okay") { dialog, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+                dialog.dismiss()
+            }
+            .show()
     }
 }
