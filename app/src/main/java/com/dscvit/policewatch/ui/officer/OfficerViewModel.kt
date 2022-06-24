@@ -1,4 +1,4 @@
-package com.dscvit.policewatch.ui.supervisor
+package com.dscvit.policewatch.ui.officer
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,8 +11,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class SupervisorViewModel @Inject constructor(private val userRepository: UserRepository) :
+class OfficerViewModel @Inject constructor(private val userRepository: UserRepository) :
     ViewModel() {
+
+    var isSharingLocation = false
 
     init {
         updateUserToken()
@@ -20,10 +22,6 @@ class SupervisorViewModel @Inject constructor(private val userRepository: UserRe
 
     private var _idToken: MutableLiveData<String> = MutableLiveData()
     val idToken: LiveData<String> get() = _idToken
-
-    fun getUserToken(): String {
-        return userRepository.getSavedUserToken()
-    }
 
     fun resetSavedUserToken() {
         userRepository.resetSavedUserToken()
