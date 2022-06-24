@@ -20,7 +20,7 @@ object Constants {
         PatrollingPoint(name = "CHINGMEI BAZAR", latitude = 24.4799539, longitude = 93.8075781),
         PatrollingPoint(name = "THANGALAWAI", latitude = 24.453129, longitude = 93.794158),
         PatrollingPoint(name = "KUMBI BAZAR", latitude = 24.4319071, longitude = 93.8089262),
-        PatrollingPoint(name = "SAGANG BAZAR", latitude = 23.383513, longitude = 93.829091),
+        PatrollingPoint(name = "SAGANG BAZAR", latitude = 24.383513, longitude = 93.829091),
         PatrollingPoint(name = "SENDRA CHINGKHONG", latitude = 24.514771, longitude = 93.792946),
         PatrollingPoint(name = "THANGA HAORENG BAZAR", latitude = 24.534954, longitude = 93.834310),
         PatrollingPoint(name = "THANGA LAWAI BAZAR", latitude = 24.450076, longitude = 93.791402),

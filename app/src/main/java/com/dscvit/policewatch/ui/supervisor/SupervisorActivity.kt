@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivitySupervisorBinding
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
+import com.dscvit.policewatch.utils.Constants
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -100,30 +101,36 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         map.setMinZoomPreference(10f)
 
-        val home = LatLng(12.888593, 77.545432)
-
-        val iconGenerator = IconGenerator(this)
-        iconGenerator.setStyle(IconGenerator.STYLE_BLUE)
-
-        map.addMarker(
-            MarkerOptions()
-                .position(home)
-                .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon("Home")))
-                .anchor(iconGenerator.anchorU, iconGenerator.anchorV)
-        )
-
-        map.addCircle(
-            CircleOptions()
-                .center(home)
-                .radius(100.0)
-                .strokeColor(Color.parseColor("#7087CEEB"))
-                .fillColor(Color.parseColor("#6087CEEB"))
-        )
+        addPatrollingPoints()
 
         val cameraPosition = CameraPosition.Builder()
-            .target(home)
+            .target(LatLng(24.514771, 93.792946))
             .zoom(13f)
             .build()
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+    private fun addPatrollingPoints() {
+        val iconGenerator = IconGenerator(this)
+        iconGenerator.setStyle(IconGenerator.STYLE_BLUE)
+
+        for (patrollingPoint in Constants.PATROLLING_POINTS) {
+            val coordinates = LatLng(patrollingPoint.latitude, patrollingPoint.longitude)
+
+            map.addMarker(
+                MarkerOptions()
+                    .position(coordinates)
+                    .icon(BitmapDescriptorFactory.fromBitmap(iconGenerator.makeIcon(patrollingPoint.name)))
+                    .anchor(iconGenerator.anchorU, iconGenerator.anchorV)
+            )
+
+            map.addCircle(
+                CircleOptions()
+                    .center(coordinates)
+                    .radius(200.0)
+                    .strokeColor(Color.parseColor("#7087CEEB"))
+                    .fillColor(Color.parseColor("#6087CEEB"))
+            )
+        }
     }
 }
