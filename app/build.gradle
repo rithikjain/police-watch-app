@@ -83,4 +83,7 @@ dependencies {
 
     // Permissions
     implementation 'com.github.fondesa:kpermissions:3.3.0'
+
+    // WebSocket
+    implementation "org.java-websocket:Java-WebSocket:1.5.1"
 }

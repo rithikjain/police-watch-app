@@ -13,11 +13,20 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.dscvit.policewatch.R
+import com.dscvit.policewatch.repository.UserRepository
 import com.google.android.gms.location.*
+import dagger.hilt.android.AndroidEntryPoint
+import org.java_websocket.client.WebSocketClient
+import org.java_websocket.handshake.ServerHandshake
+import java.net.URI
+import javax.inject.Inject
+import javax.net.ssl.SSLSocketFactory
 
+@AndroidEntryPoint
 class LocationService : Service() {
 
     companion object {
+        const val TAG = "LocationService"
         const val CHANNEL_ID = "Police_Watch_Notifications"
 
         // Service Actions
@@ -34,6 +43,15 @@ class LocationService : Service() {
     // Getting access to the NotificationManager
     private lateinit var notificationManager: NotificationManager
 
+    // Web socket
+    private var webSocketClient: WebSocketClient? = null
+
+    @Inject
+    lateinit var userRepository: UserRepository
+
+    lateinit var locationClient: FusedLocationProviderClient
+    private var locationCallback: LocationCallback? = null
+
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
@@ -45,6 +63,7 @@ class LocationService : Service() {
 
         createChannel()
         getNotificationManager()
+        connectToWebsocket()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -66,6 +85,10 @@ class LocationService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         IS_RUNNING = false
+        if (locationCallback != null) {
+            locationClient.removeLocationUpdates(locationCallback!!)
+        }
+        webSocketClient?.close()
     }
 
     private fun startLocationService() {
@@ -75,33 +98,72 @@ class LocationService : Service() {
 
     private fun stopLocationService() {
         stopForeground(true)
+        webSocketClient?.close()
+        webSocketClient = null
         stopSelf()
     }
 
     private fun requestLocationUpdates() {
         val request = LocationRequest.create().apply {
-            interval = 5000
-            fastestInterval = 4000
+            interval = 6000
+            fastestInterval = 6000
             priority = Priority.PRIORITY_HIGH_ACCURACY
         }
 
-        val client = LocationServices.getFusedLocationProviderClient(this)
+
+        locationClient = LocationServices.getFusedLocationProviderClient(this)
         if (checkPermissions()) {
-            client.requestLocationUpdates(request, object : LocationCallback() {
+            locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     super.onLocationResult(locationResult)
 
                     val location = locationResult.lastLocation
                     if (location != null) {
-                        Toast.makeText(
-                            this@LocationService,
-                            "Lat: ${location.latitude} Lon: ${location.longitude}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        if (webSocketClient != null && webSocketClient?.isOpen == true) {
+                            Toast.makeText(
+                                this@LocationService,
+                                "Lat: ${location.latitude} Lon: ${location.longitude}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else if (webSocketClient != null && webSocketClient?.isClosed == true) {
+                            webSocketClient?.reconnect()
+                        }
                     }
                 }
-            }, null)
+            }
+            locationClient.requestLocationUpdates(
+                request,
+                locationCallback as LocationCallback, null
+            )
         }
+    }
+
+    private fun connectToWebsocket() {
+        val uri = URI("wss://police-watch-testing.herokuapp.com/ws/patroller/location")
+        val socketFactory: SSLSocketFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
+        val headers = HashMap<String, String>()
+        headers["Authorization"] = userRepository.getSavedUserToken()
+
+        webSocketClient = object : WebSocketClient(uri, headers) {
+            override fun onOpen(handshakedata: ServerHandshake?) {
+                Log.d(TAG, "WebSocket onOpen")
+            }
+
+            override fun onMessage(message: String?) {
+                Log.d(TAG, "WebSocket onMessage: $message")
+            }
+
+            override fun onClose(code: Int, reason: String?, remote: Boolean) {
+                Log.d(TAG, "WebSocket onClose: $reason")
+            }
+
+            override fun onError(ex: Exception?) {
+                Log.d(TAG, "WebSocket onError: ${ex?.message}")
+            }
+        }
+
+        webSocketClient?.setSocketFactory(socketFactory)
+        webSocketClient?.connect()
     }
 
     private fun checkPermissions(): Boolean {
