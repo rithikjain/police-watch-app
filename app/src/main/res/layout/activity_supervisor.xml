@@ -38,7 +38,7 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="550dp"
         android:background="@drawable/bottom_sheet_background"
         android:elevation="4dp"
         android:visibility="gone"
@@ -70,6 +70,26 @@
                 android:text="@string/patrolling_points"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/search_text_input_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:hint="@string/search"
+                app:endIconMode="clear_text"
+                app:startIconDrawable="@drawable/ic_search">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="textShortMessage"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/patrolling_points_recycler_view"

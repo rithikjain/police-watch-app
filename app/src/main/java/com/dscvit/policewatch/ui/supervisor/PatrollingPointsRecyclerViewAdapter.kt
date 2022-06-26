@@ -7,10 +7,15 @@ import com.dscvit.policewatch.databinding.PatrollingPointItemBinding
 import com.dscvit.policewatch.models.PatrollingPoint
 
 class PatrollingPointsRecyclerViewAdapter(
-    private val patrollingPoints: List<PatrollingPoint>,
+    private var patrollingPoints: MutableList<PatrollingPoint>,
     val onClick: (PatrollingPoint) -> Unit
 ) :
     RecyclerView.Adapter<PatrollingPointsRecyclerViewAdapter.ViewHolder>() {
+
+    fun updatePatrollingPoints(newPatrollingPoints: List<PatrollingPoint>) {
+        patrollingPoints = newPatrollingPoints as MutableList<PatrollingPoint>
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(private val binding: PatrollingPointItemBinding) :
         RecyclerView.ViewHolder(binding.root) {

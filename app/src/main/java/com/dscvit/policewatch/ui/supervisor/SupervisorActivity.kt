@@ -15,12 +15,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivitySupervisorBinding
 import com.dscvit.policewatch.models.Officer
 import com.dscvit.policewatch.models.PatrollingPoint
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
+import com.dscvit.policewatch.ui.utils.hideKeyboard
 import com.dscvit.policewatch.utils.Constants
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -80,11 +82,13 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupViews() {
-        patrollingPointsAdapter = PatrollingPointsRecyclerViewAdapter(Constants.PATROLLING_POINTS) {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            binding.bottomSheet.scrollTo(0, 0)
-            onPatrollingPointSelected(it)
-        }
+        patrollingPointsAdapter =
+            PatrollingPointsRecyclerViewAdapter(Constants.PATROLLING_POINTS as MutableList<PatrollingPoint>) {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                binding.bottomSheet.scrollTo(0, 0)
+                onPatrollingPointSelected(it)
+                hideKeyboardAndClearFocus()
+            }
 
         binding.patrollingPointsRecyclerView.apply {
             adapter = patrollingPointsAdapter
@@ -121,6 +125,16 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
             popUpMenu.show()
         }
+
+        binding.searchTextInputLayout.editText!!.addTextChangedListener { editText ->
+            if (editText?.isEmpty() != false) {
+                patrollingPointsAdapter.updatePatrollingPoints(Constants.PATROLLING_POINTS)
+            } else {
+                patrollingPointsAdapter.updatePatrollingPoints(Constants.PATROLLING_POINTS.filter {
+                    it.name.lowercase().startsWith(editText.toString().lowercase())
+                })
+            }
+        }
     }
 
     private fun setupObservers() {
@@ -128,6 +142,13 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
             // DO something with the ID Token here
             Log.d(TAG, it ?: "")
         }
+    }
+
+    private fun hideKeyboardAndClearFocus() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            hideKeyboard()
+            binding.searchTextInputLayout.editText!!.clearFocus()
+        }, 500)
     }
 
     private fun setupMap() {
