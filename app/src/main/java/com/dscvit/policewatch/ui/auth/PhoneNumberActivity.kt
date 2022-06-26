@@ -70,7 +70,11 @@ class PhoneNumberActivity : AppCompatActivity() {
                 is Resource.Success -> {
                     Log.d(TAG, "Status Code: ${it.statusCode.toString()}")
                     viewModel.setUserSignedIn(it.data ?: User())
-                    navigateToSupervisorActivity()
+                    if (it.data?.isSupervisor == true) {
+                        navigateToSupervisorActivity()
+                    } else {
+                        navigateToOfficerActivity()
+                    }
                 }
                 is Resource.Error -> {
                     if (it.statusCode == 401) {
@@ -86,8 +90,12 @@ class PhoneNumberActivity : AppCompatActivity() {
 
     private fun navigateToHomeIfUserSignedIn() {
         if (viewModel.isUserSignedIn()) {
-            // navigateToSupervisorActivity()
-            navigateToOfficerActivity()
+            val user = viewModel.getSavedUser()
+            if (user.isSupervisor) {
+                navigateToSupervisorActivity()
+            } else {
+                navigateToOfficerActivity()
+            }
         }
     }
 

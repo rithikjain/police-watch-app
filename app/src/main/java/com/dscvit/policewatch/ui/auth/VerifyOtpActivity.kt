@@ -74,8 +74,12 @@ class VerifyOtpActivity : AppCompatActivity() {
                 is Resource.Success -> {
                     Log.d(TAG, "Status Code: ${it.statusCode.toString()}")
                     viewModel.setUserSignedIn(it.data ?: User())
-                    // navigateToSupervisorActivity()
-                    navigateToOfficerActivity()
+                    Log.d(TAG, "${it.data}")
+                    if (it.data?.isSupervisor == true) {
+                        navigateToSupervisorActivity()
+                    } else {
+                        navigateToOfficerActivity()
+                    }
                 }
                 is Resource.Error -> {
                     if (it.statusCode == 401) {
