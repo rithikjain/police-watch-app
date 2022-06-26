@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -16,7 +15,6 @@ import com.dscvit.policewatch.databinding.ActivityOfficerBinding
 import com.dscvit.policewatch.service.LocationService
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
 import com.fondesa.kpermissions.allGranted
-import com.fondesa.kpermissions.extension.liveData
 import com.fondesa.kpermissions.extension.permissionsBuilder
 import com.fondesa.kpermissions.extension.send
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -102,6 +100,9 @@ class OfficerActivity : AppCompatActivity() {
         Firebase.auth.signOut()
         viewModel.resetSavedUserToken()
         viewModel.setUserSignedOut()
+        viewModel.isSharingLocation = false
+        // Stop sharing location
+        stopLocationService()
         navigateToPhoneNumberActivity()
     }
 

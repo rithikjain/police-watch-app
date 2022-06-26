@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.dscvit.policewatch.R
@@ -129,11 +128,7 @@ class LocationService : Service() {
                     val location = locationResult.lastLocation
                     if (location != null) {
                         if (webSocketClient != null && webSocketClient?.isOpen == true) {
-                            Toast.makeText(
-                                this@LocationService,
-                                "Lat: ${location.latitude} Lon: ${location.longitude}",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Log.d(TAG, "Lat: ${location.latitude} Lon: ${location.longitude}")
 
                             val locationModel =
                                 Location(Coordinates(location.latitude, location.longitude))
