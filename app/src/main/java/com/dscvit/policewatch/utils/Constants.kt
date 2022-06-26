@@ -3,7 +3,7 @@ package com.dscvit.policewatch.utils
 import com.dscvit.policewatch.models.PatrollingPoint
 
 object Constants {
-    const val BASE_URL = "https://police-watch-testing.herokuapp.com"
+    const val BASE_URL = "police-watch-testing.herokuapp.com"
 
     const val SHARED_PREF_NAME = "police_watch_pref"
     const val SHARED_PREF_USER_TOKEN = "SHARED_PREF_USER_TOKEN"

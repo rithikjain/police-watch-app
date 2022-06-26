@@ -16,6 +16,7 @@ import com.dscvit.policewatch.R
 import com.dscvit.policewatch.models.Coordinates
 import com.dscvit.policewatch.models.Location
 import com.dscvit.policewatch.repository.UserRepository
+import com.dscvit.policewatch.utils.Constants
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
@@ -147,7 +148,7 @@ class LocationService : Service() {
     }
 
     private fun connectToWebsocket() {
-        val uri = URI("wss://police-watch-testing.herokuapp.com/ws/patroller/location")
+        val uri = URI("wss://${Constants.BASE_URL}/ws/patroller/location")
         val socketFactory: SSLSocketFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
         val headers = HashMap<String, String>()
         headers["Authorization"] = userRepository.getSavedUserToken()

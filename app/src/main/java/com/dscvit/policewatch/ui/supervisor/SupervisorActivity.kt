@@ -16,6 +16,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dscvit.policewatch.R
 import com.dscvit.policewatch.databinding.ActivitySupervisorBinding
+import com.dscvit.policewatch.models.Officer
 import com.dscvit.policewatch.models.PatrollingPoint
 import com.dscvit.policewatch.ui.auth.PhoneNumberActivity
 import com.dscvit.policewatch.utils.Constants
@@ -27,8 +28,13 @@ import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import com.google.maps.android.ui.IconGenerator
 import dagger.hilt.android.AndroidEntryPoint
+import org.java_websocket.client.WebSocketClient
+import org.java_websocket.handshake.ServerHandshake
+import java.net.URI
+import javax.net.ssl.SSLSocketFactory
 
 
 @AndroidEntryPoint
@@ -43,6 +49,9 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var patrollingPointsAdapter: PatrollingPointsRecyclerViewAdapter
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<NestedScrollView>
+    private var webSocketClient: WebSocketClient? = null
+    private var isMapReady = false
+    private val officerMarkersMap = hashMapOf<Int, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +61,18 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         setupViews()
         setupListeners()
-        setupObservers()
+        //setupObservers()
         setupMap()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        connectToWebsocket()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        webSocketClient?.close()
     }
 
     private fun setupViews() {
@@ -128,6 +147,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        isMapReady = true
 
         binding.bottomSheet.visibility = View.VISIBLE
 
@@ -144,7 +164,6 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         map.setMinZoomPreference(10f)
 
         addPatrollingPoints()
-        addPoliceOfficers()
 
         val cameraPosition = CameraPosition.Builder()
             .target(LatLng(24.534854, 93.756798))
@@ -185,13 +204,53 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun addPoliceOfficers() {
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(24.539628, 93.755377))
-                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
-                .title("Police Officer")
-        )
+    private fun updateOfficerLocation(officer: Officer) {
+        val id = officer.patrollerID
+        if (officerMarkersMap.containsKey(id)) {
+            officerMarkersMap[id]?.position = LatLng(officer.coordinates.x, officer.coordinates.y)
+        } else {
+            val marker = map.addMarker(
+                MarkerOptions()
+                    .position(LatLng(24.539628, 93.755377))
+                    .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
+                    .title("Police Officer")
+            )
+            if (marker != null) officerMarkersMap[id] = marker
+        }
+    }
+
+    private fun connectToWebsocket() {
+        val uri = URI("wss://${Constants.BASE_URL}/ws/patroller/location")
+        val socketFactory: SSLSocketFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
+        val headers = HashMap<String, String>()
+        headers["Authorization"] = viewModel.getUserToken()
+
+        val gson = Gson()
+
+        webSocketClient = object : WebSocketClient(uri, headers) {
+            override fun onOpen(handshakedata: ServerHandshake?) {
+                Log.d(TAG, "WebSocket onOpen")
+            }
+
+            override fun onMessage(message: String?) {
+                Log.d(TAG, "WebSocket onMessage: $message")
+                val officer = gson.fromJson(message ?: "", Officer::class.java)
+                runOnUiThread {
+                    if (isMapReady) updateOfficerLocation(officer)
+                }
+            }
+
+            override fun onClose(code: Int, reason: String?, remote: Boolean) {
+                Log.d(TAG, "WebSocket onClose: $reason")
+            }
+
+            override fun onError(ex: Exception?) {
+                Log.d(TAG, "WebSocket onError: ${ex?.message}")
+            }
+        }
+
+        webSocketClient?.setSocketFactory(socketFactory)
+        webSocketClient?.connect()
     }
 
     private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {

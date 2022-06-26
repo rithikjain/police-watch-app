@@ -50,7 +50,7 @@ class AppModule {
     @Singleton
     @Provides
     fun provideApi(@ApplicationContext context: Context): ApiInterface = Retrofit.Builder()
-        .baseUrl(Constants.BASE_URL)
+        .baseUrl("https://${Constants.BASE_URL}")
         .addConverterFactory(GsonConverterFactory.create())
         .client(getOkHttpClient(context))
         .build()
