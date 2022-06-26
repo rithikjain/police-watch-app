@@ -111,6 +111,7 @@ class LocationService : Service() {
         val request = LocationRequest.create().apply {
             interval = 6000
             fastestInterval = 6000
+            smallestDisplacement = 5f
             priority = Priority.PRIORITY_HIGH_ACCURACY
         }
 

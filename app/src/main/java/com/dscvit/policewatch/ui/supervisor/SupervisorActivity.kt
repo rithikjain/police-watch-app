@@ -175,7 +175,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun onPatrollingPointSelected(patrollingPoint: PatrollingPoint) {
         val cameraPosition = CameraPosition.Builder()
             .target(LatLng(patrollingPoint.latitude, patrollingPoint.longitude))
-            .zoom(15f)
+            .zoom(14f)
             .build()
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
@@ -211,9 +211,9 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             val marker = map.addMarker(
                 MarkerOptions()
-                    .position(LatLng(24.539628, 93.755377))
+                    .position(LatLng(officer.coordinates.x, officer.coordinates.y))
                     .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
-                    .title("Police Officer")
+                    .title(officer.patrollerID.toString())
             )
             if (marker != null) officerMarkersMap[id] = marker
         }
