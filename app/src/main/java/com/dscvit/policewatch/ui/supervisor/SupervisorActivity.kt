@@ -238,14 +238,14 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
                 MarkerOptions()
                     .position(LatLng(officer.coordinates.x, officer.coordinates.y))
                     .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
-                    .title(officer.patrollerID.toString())
+                    .title("${officer.firstName} ${officer.lastName}")
             )
             if (marker != null) officerMarkersMap[id] = marker
         }
     }
 
     private fun connectToWebsocket() {
-        val uri = URI("wss://${Constants.BASE_URL}/ws/patroller/location")
+        val uri = URI("wss://${Constants.BASE_URL}/ws/supervisor/patroller/locations")
         val socketFactory: SSLSocketFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
         val headers = HashMap<String, String>()
         headers["Authorization"] = viewModel.getUserToken()
