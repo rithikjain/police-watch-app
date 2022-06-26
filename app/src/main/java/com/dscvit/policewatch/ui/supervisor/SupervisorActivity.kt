@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
@@ -52,6 +54,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     private var webSocketClient: WebSocketClient? = null
     private var isMapReady = false
     private val officerMarkersMap = hashMapOf<Int, Marker>()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +66,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         setupListeners()
         //setupObservers()
         setupMap()
+        keepSocketAlive()
     }
 
     override fun onResume() {
@@ -251,6 +255,17 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         webSocketClient?.setSocketFactory(socketFactory)
         webSocketClient?.connect()
+    }
+
+    private fun keepSocketAlive() {
+        mainHandler.postDelayed(object : Runnable {
+            override fun run() {
+                if (webSocketClient != null && webSocketClient?.isClosed == true) {
+                    webSocketClient?.reconnect()
+                }
+                mainHandler.postDelayed(this, 10000)
+            }
+        }, 10000)
     }
 
     private fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {

@@ -7,7 +7,9 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -55,6 +57,7 @@ class LocationService : Service() {
 
     lateinit var locationClient: FusedLocationProviderClient
     private var locationCallback: LocationCallback? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -68,6 +71,7 @@ class LocationService : Service() {
         createChannel()
         getNotificationManager()
         connectToWebsocket()
+        keepSocketAlive()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -135,8 +139,6 @@ class LocationService : Service() {
                             val locationModel =
                                 Location(Coordinates(location.latitude, location.longitude))
                             webSocketClient?.send(gson.toJson(locationModel))
-                        } else if (webSocketClient != null && webSocketClient?.isClosed == true) {
-                            webSocketClient?.reconnect()
                         }
                     }
                 }
@@ -174,6 +176,17 @@ class LocationService : Service() {
 
         webSocketClient?.setSocketFactory(socketFactory)
         webSocketClient?.connect()
+    }
+
+    private fun keepSocketAlive() {
+        mainHandler.postDelayed(object : Runnable {
+            override fun run() {
+                if (webSocketClient != null && webSocketClient?.isClosed == true) {
+                    webSocketClient?.reconnect()
+                }
+                mainHandler.postDelayed(this, 10000)
+            }
+        }, 10000)
     }
 
     private fun checkPermissions(): Boolean {
