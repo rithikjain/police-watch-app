@@ -13,8 +13,11 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.dscvit.policewatch.R
+import com.dscvit.policewatch.models.Coordinates
+import com.dscvit.policewatch.models.Location
 import com.dscvit.policewatch.repository.UserRepository
 import com.google.android.gms.location.*
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
@@ -110,6 +113,7 @@ class LocationService : Service() {
             priority = Priority.PRIORITY_HIGH_ACCURACY
         }
 
+        val gson = Gson()
 
         locationClient = LocationServices.getFusedLocationProviderClient(this)
         if (checkPermissions()) {
@@ -125,6 +129,10 @@ class LocationService : Service() {
                                 "Lat: ${location.latitude} Lon: ${location.longitude}",
                                 Toast.LENGTH_SHORT
                             ).show()
+
+                            val locationModel =
+                                Location(Coordinates(location.latitude, location.longitude))
+                            webSocketClient?.send(gson.toJson(locationModel))
                         } else if (webSocketClient != null && webSocketClient?.isClosed == true) {
                             webSocketClient?.reconnect()
                         }
