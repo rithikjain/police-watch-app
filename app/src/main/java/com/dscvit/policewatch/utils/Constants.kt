@@ -61,4 +61,14 @@ object Constants {
             longitude = 93.719254
         ),
     )
+
+    val POLICE_STATION_POINTS = listOf(
+        PatrollingPoint(name = "NAMBOL PS", latitude = 24.720817, longitude = 93.842528),
+        PatrollingPoint(name = "BISHNUPUR PS", latitude = 24.6190992, longitude = 93.7617968),
+        PatrollingPoint(name = "LOKTAK PS", latitude = 24.5797212, longitude = 93.7434042),
+        PatrollingPoint(name = "MOIRANG PS", latitude = 24.4989, longitude = 93.7646),
+        PatrollingPoint(name = "KUMBI PS", latitude = 24.42503, longitude = 93.812715),
+        PatrollingPoint(name = "KEIBUL LAMJAO PS", latitude = 24.480043, longitude = 93.809159),
+        PatrollingPoint(name = "PGCI PS", latitude = 24.436522, longitude = 93.723255),
+    )
 }

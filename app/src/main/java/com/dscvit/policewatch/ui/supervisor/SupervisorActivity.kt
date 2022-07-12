@@ -57,6 +57,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
     private var isMapReady = false
     private val officerMarkersMap = hashMapOf<Int, Marker>()
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val points = mutableListOf<PatrollingPoint>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +65,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivitySupervisorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupData()
         setupViews()
         setupListeners()
         //setupObservers()
@@ -81,9 +83,14 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         webSocketClient?.close()
     }
 
+    private fun setupData() {
+        points.addAll(Constants.PATROLLING_POINTS)
+        points.addAll(Constants.POLICE_STATION_POINTS)
+    }
+
     private fun setupViews() {
         patrollingPointsAdapter =
-            PatrollingPointsRecyclerViewAdapter(Constants.PATROLLING_POINTS as MutableList<PatrollingPoint>) {
+            PatrollingPointsRecyclerViewAdapter(points) {
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.bottomSheet.scrollTo(0, 0)
                 onPatrollingPointSelected(it)
@@ -128,10 +135,10 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding.searchTextInputLayout.editText!!.addTextChangedListener { editText ->
             if (editText?.isEmpty() != false) {
-                patrollingPointsAdapter.updatePatrollingPoints(Constants.PATROLLING_POINTS)
+                patrollingPointsAdapter.updatePatrollingPoints(points)
             } else {
-                patrollingPointsAdapter.updatePatrollingPoints(Constants.PATROLLING_POINTS.filter {
-                    it.name.lowercase().startsWith(editText.toString().lowercase())
+                patrollingPointsAdapter.updatePatrollingPoints(points.filter {
+                    it.name.lowercase().contains(editText.toString().lowercase())
                 })
             }
         }
@@ -189,6 +196,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
         map.setMinZoomPreference(10f)
 
         addPatrollingPoints()
+        addPoliceStations()
 
         val cameraPosition = CameraPosition.Builder()
             .target(LatLng(24.534854, 93.756798))
@@ -225,6 +233,36 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
                     .radius(200.0)
                     .strokeColor(Color.parseColor("#7087CEEB"))
                     .fillColor(Color.parseColor("#6087CEEB"))
+            )
+        }
+    }
+
+    private fun addPoliceStations() {
+        val iconGenerator = IconGenerator(this)
+        iconGenerator.setStyle(IconGenerator.STYLE_RED)
+
+        for (policeStationPoint in Constants.POLICE_STATION_POINTS) {
+            val coordinates = LatLng(policeStationPoint.latitude, policeStationPoint.longitude)
+
+            map.addMarker(
+                MarkerOptions()
+                    .position(coordinates)
+                    .icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            iconGenerator.makeIcon(
+                                policeStationPoint.name
+                            )
+                        )
+                    )
+                    .anchor(iconGenerator.anchorU, iconGenerator.anchorV)
+            )
+
+            map.addCircle(
+                CircleOptions()
+                    .center(coordinates)
+                    .radius(200.0)
+                    .strokeColor(Color.parseColor("#70FF0000"))
+                    .fillColor(Color.parseColor("#60FF0000"))
             )
         }
     }
