@@ -239,6 +239,7 @@ class SupervisorActivity : AppCompatActivity(), OnMapReadyCallback {
                     .position(LatLng(officer.coordinates.x, officer.coordinates.y))
                     .icon(bitmapDescriptorFromVector(this, R.drawable.ic_police_circle))
                     .title("${officer.firstName} ${officer.lastName}")
+                    .snippet(officer.label)
             )
             if (marker != null) officerMarkersMap[id] = marker
         }

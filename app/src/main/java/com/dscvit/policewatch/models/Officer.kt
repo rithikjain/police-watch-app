@@ -10,5 +10,7 @@ data class Officer(
     @SerializedName("patroller_id")
     val patrollerID: Int,
     @SerializedName("location")
-    val coordinates: Coordinates
+    val coordinates: Coordinates,
+    @SerializedName("label")
+    val label: String
 )
