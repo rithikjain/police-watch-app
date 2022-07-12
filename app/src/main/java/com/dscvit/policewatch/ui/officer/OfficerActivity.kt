@@ -42,7 +42,7 @@ class OfficerActivity : AppCompatActivity() {
     private fun setupViews() {
         binding.nameTextView.text = "Hi, ${viewModel.getSavedUser()?.firstName}"
         if (LocationService.IS_RUNNING) {
-            binding.toggleLocationButton.text = "Stop Sharing Location"
+            binding.toggleLocationButton.text = "Duty Complete, Stop Sharing Location"
             viewModel.isSharingLocation = true
         } else {
             binding.toggleLocationButton.text = "Start Sharing Location"
@@ -75,7 +75,7 @@ class OfficerActivity : AppCompatActivity() {
                 // Start sharing location
                 if (checkIfAllPermissionsAreGranted()) {
                     startLocationService()
-                    binding.toggleLocationButton.text = "Stop Sharing Location"
+                    binding.toggleLocationButton.text = "Duty Complete, Stop Sharing Location"
                     viewModel.isSharingLocation = true
                 } else {
                     showPermissionRequestDialog()

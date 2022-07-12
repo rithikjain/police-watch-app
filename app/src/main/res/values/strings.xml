@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Police Watch</string>
+    <string name="app_name">Patrol Watch</string>
     <string name="plane_image">Plane Image</string>
     <string name="phone_verification">Phone Verification</string>
     <string name="verification_description_text">We will send you an One Time Password on this number for verification</string>
@@ -18,4 +18,5 @@
     <string name="up_arrow">Up Arrow</string>
     <string name="start_sharing_location">Start Sharing Location</string>
     <string name="search">Search</string>
+    <string name="logo">Logo</string>
 </resources>
