@@ -187,9 +187,14 @@ class LocationService : Service() {
         val finePermission =
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if (finePermission != PackageManager.PERMISSION_GRANTED) return false
-        val backgroundPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        if (backgroundPermission != PackageManager.PERMISSION_GRANTED) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val backgroundPermission =
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                )
+            if (backgroundPermission != PackageManager.PERMISSION_GRANTED) return false
+        }
         return true
     }
 
@@ -225,5 +230,4 @@ class LocationService : Service() {
 
         startForeground(101, notification)
     }
-
 }

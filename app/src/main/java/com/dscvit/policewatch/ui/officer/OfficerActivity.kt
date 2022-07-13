@@ -1,9 +1,12 @@
 package com.dscvit.policewatch.ui.officer
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.PopupMenu
@@ -74,9 +77,13 @@ class OfficerActivity : AppCompatActivity() {
             } else {
                 // Start sharing location
                 if (checkIfAllPermissionsAreGranted()) {
-                    startLocationService()
-                    binding.toggleLocationButton.text = "Duty Complete, Stop Sharing Location"
-                    viewModel.isSharingLocation = true
+                    if (checkIfGPSEnabled()) {
+                        startLocationService()
+                        binding.toggleLocationButton.text = "Duty Complete, Stop Sharing Location"
+                        viewModel.isSharingLocation = true
+                    } else {
+                        showEnableGPSDialog()
+                    }
                 } else {
                     showPermissionRequestDialog()
                 }
@@ -113,11 +120,18 @@ class OfficerActivity : AppCompatActivity() {
     }
 
     private fun checkIfAllPermissionsAreGranted(): Boolean {
-        val permissions = listOf(
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            listOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            )
+        } else {
+            listOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            )
+        }
         for (permission in permissions) {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -138,15 +152,22 @@ class OfficerActivity : AppCompatActivity() {
             if (!result.allGranted()) {
                 showPermissionRequestDialog()
             } else {
-                permissionsBuilder(
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ).build().send { res ->
-                    if (!res.allGranted()) {
-                        showPermissionRequestDialog()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    permissionsBuilder(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ).build().send { res ->
+                        if (!res.allGranted()) {
+                            showPermissionRequestDialog()
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun checkIfGPSEnabled(): Boolean {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
     private fun showPermissionRequestDialog() {
@@ -159,6 +180,17 @@ class OfficerActivity : AppCompatActivity() {
                 val uri = Uri.fromParts("package", packageName, null)
                 intent.data = uri
                 startActivity(intent)
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showEnableGPSDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Please turn on your GPS")
+            .setMessage("GPS is required to share the location!")
+            .setCancelable(false)
+            .setPositiveButton("Okay") { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
